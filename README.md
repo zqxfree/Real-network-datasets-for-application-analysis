@@ -1,0 +1,1 @@
+The datasets folder contains four sub-folders, representing the raw data (PCAP files) collected from Bras and ONU network units, as well as the CSV files after feature extraction, and feature_extract.py is the feature extraction code file.
