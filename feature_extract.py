@@ -3,7 +3,7 @@ from scapy.all import rdpcap
 import os
 from scipy.stats import median_abs_deviation
 
-def feature_wash(stream):
+def feature_calculate(stream):
     pkt_count = len(stream)
     stream = np.array(stream)
     stream[:, 0] = np.r_[0, np.diff(np.abs(stream[:, 0])).astype(float)]
@@ -11,7 +11,6 @@ def feature_wash(stream):
     stream = np.vstack([np.percentile(stream, np.linspace(0., 100., 5), 0), np.mean(stream, 0), np.std(stream, 0), median_abs_deviation(stream, 0)])
     return stream, pkt_count
 
-# extract traffic feature
 def extract_feature_label(session_parent_dir):
     labels = []
     flow_features = []
@@ -40,14 +39,14 @@ def extract_feature_label(session_parent_dir):
                     flow_proto = 1
         if len(bistream) == 0:
             continue
-        bistream = feature_wash(bistream)[0]
+        bistream = feature_calculate(bistream)[0]
         if len(upstream) > 0:
-            upstream, up_pkt_count = feature_wash(upstream)
+            upstream, up_pkt_count = feature_calculate(upstream)
         else:
             upstream = np.zeros((8, 2))
             up_pkt_count = 0
         if len(downstream) > 0:
-            downstream, _ = feature_wash(downstream)
+            downstream, _ = feature_calculate(downstream)
         else:
             downstream = np.zeros((8, 2))
         upstream_port = np.array([upstream_port.count(443), upstream_port.count(80)])
@@ -62,7 +61,7 @@ def extract_feature_label(session_parent_dir):
     return flow_features, labels
 
 if __name__ == "__main__":
-    # define file directories
+    # extract traffic features and labels from session-splitted files
     flow_features, labels = extract_feature_label(r'.\dataset\session_example')
     print(flow_features.shape, labels.shape)
     print(flow_features)
